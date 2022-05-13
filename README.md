@@ -19,3 +19,8 @@ Golang (blockchain) goat otter = Goatter
 src: https://dev.to/nheindev/build-the-hello-world-of-blockchain-in-go-bli
 
 ## TODO
+1. (finish tutorial)
+2. handle peer to peer network and deploy on a test network (comprised of our own laptops)
+3. checkout more specific proof of work algorithms and other methods
+4. acyclic graph: @SpaceAzur aDLD (acyclic Diagram Lead Designer)
+5. contact marketing for money raise
