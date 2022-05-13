@@ -1,8 +1,8 @@
-# Gotter
+# Goatter
 
-Golang (blockchain) otter = Gotter
+Golang (blockchain) goat otter = Goatter
 
-![image](https://user-images.githubusercontent.com/6129046/167150836-46045fed-6073-4bf6-9694-cd4a2db4f095.png)
+![image](https://user-images.githubusercontent.com/6129046/168286709-d9310473-556b-4825-b378-abdebe623e7f.png)
 
 ## Table of contents
 
