@@ -1,7 +1,12 @@
 package main
 
-import "fmt"
+import "github.com/Dedalum/goatter/blockchain"
 
 func main() {
-	fmt.Println("vim-go")
+	chain := blockchain.NewChain()
+
+	chain.AddBlock("block nb 1")
+	chain.AddBlock("to the moon")
+
+	chain.Describe()
 }
