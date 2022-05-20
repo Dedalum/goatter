@@ -7,7 +7,7 @@ import (
 )
 
 type Chain struct {
-	blocks []*Block
+	Blocks []*Block
 }
 
 // NewChain returns a new initialised chain
@@ -19,19 +19,24 @@ type Block struct {
 	Hash     []byte
 	Data     []byte
 	PrevHash []byte
+	Nonce    int
 }
 
 // NewBlock returns a new block
 func NewBlock(data string, prevHash []byte) *Block {
-	block := &Block{[]byte{}, []byte(data), prevHash}
-	block.DeriveHash()
+	block := &Block{[]byte{}, []byte(data), prevHash, 0}
+	pow := NewProofOfWork(block)
+	nonce, hash := pow.Run()
+
+	block.Hash = hash[:]
+	block.Nonce = nonce
 
 	return block
 }
 
 func (c *Chain) AddBlock(data string) {
-	prevHash := c.blocks[len(c.blocks)-1].Hash
-	c.blocks = append(c.blocks, NewBlock(data, prevHash))
+	prevHash := c.Blocks[len(c.Blocks)-1].Hash
+	c.Blocks = append(c.Blocks, NewBlock(data, prevHash))
 }
 
 func Genesis() *Block {
@@ -48,7 +53,7 @@ func (b *Block) Describe() {
 }
 
 func (c *Chain) Describe() {
-	for _, block := range c.blocks {
+	for _, block := range c.Blocks {
 		block.Describe()
 	}
 }
