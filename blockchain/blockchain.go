@@ -1,59 +1,108 @@
 package blockchain
 
 import (
-	"bytes"
-	"crypto/sha256"
 	"fmt"
+
+	"github.com/dgraph-io/badger"
 )
 
-type Chain struct {
-	Blocks []*Block
+type BlockChain struct {
+	LastHash []byte
+	Database *badger.DB
 }
 
-// NewChain returns a new initialised chain
-func NewChain() *Chain {
-	return &Chain{[]*Block{Genesis()}}
+type BlockChainIterator struct {
+	CurrentHash []byte
+	Database    *badger.DB
 }
 
-type Block struct {
-	Hash     []byte
-	Data     []byte
-	PrevHash []byte
-	Nonce    int
+const dbPath = "./tmp/blocks"
+
+// NewBlockChain returns a new initialised chain
+func InitBlockChain() *BlockChain {
+
+	// 1
+	var lastHash []byte
+	opts := badger.DefaultOptions(dbPath)
+
+	db, err := badger.Open(opts)
+	Handle(err)
+
+	// 2
+	err = db.Update(func(txn *badger.Txn) error {
+		// lh = last hsh
+		item, err := txn.Get([]byte("lh"))
+		if err == badger.ErrKeyNotFound {
+			fmt.Println("No existing blockchain found")
+			genesis := Genesis()
+			fmt.Println("Genesis proved")
+			err = txn.Set(genesis.Hash, genesis.Serialize())
+			Handle(err)
+			err = txn.Set([]byte("lh"), genesis.Hash)
+
+			lastHash = genesis.Hash
+			return err
+		} else {
+			// 3
+			Handle(err)
+			err = item.Value(func(val []byte) error {
+				lastHash = val
+				return nil
+			})
+			Handle(err)
+			return err
+		}
+	})
+	Handle(err)
+
+	return &BlockChain{lastHash, db}
 }
 
-// NewBlock returns a new block
-func NewBlock(data string, prevHash []byte) *Block {
-	block := &Block{[]byte{}, []byte(data), prevHash, 0}
-	pow := NewProofOfWork(block)
-	nonce, hash := pow.Run()
+func (chain *BlockChain) AddBlock(data string) {
+	var lastHash []byte
+	err := chain.Database.View(func(txn *badger.Txn) error {
+		item, err := txn.Get([]byte("lh"))
+		Handle(err)
+		err = item.Value(func(val []byte) error {
+			lastHash = val
+			return nil
+		})
+		Handle(err)
+		return err
+	})
+	Handle(err)
 
-	block.Hash = hash[:]
-	block.Nonce = nonce
+	newBlock := NewBlock(data, lastHash)
+	err = chain.Database.Update(func(transaction *badger.Txn) error {
+		err := transaction.Set(newBlock.Hash, newBlock.Serialize())
+		Handle(err)
+		err = transaction.Set([]byte("lh"), newBlock.Hash)
+		chain.LastHash = newBlock.Hash
+		return err
+	})
+	Handle(err)
+}
+
+func (chain *BlockChain) Iterator() *BlockChainIterator {
+	iterator := BlockChainIterator{chain.LastHash, chain.Database}
+	return &iterator
+}
+
+func (iterator *BlockChainIterator) Next() *Block {
+	var block *Block
+
+	err := iterator.Database.View(func(txn *badger.Txn) error {
+		item, err := txn.Get(iterator.CurrentHash)
+		Handle(err)
+
+		err = item.Value(func(val []byte) error {
+			block = Deserialize(val)
+			return nil
+		})
+		return err
+	})
+	Handle(err)
+	iterator.CurrentHash = block.PrevHash
 
 	return block
-}
-
-func (c *Chain) AddBlock(data string) {
-	prevHash := c.Blocks[len(c.Blocks)-1].Hash
-	c.Blocks = append(c.Blocks, NewBlock(data, prevHash))
-}
-
-func Genesis() *Block {
-	return NewBlock("GoatterGenesis", []byte{})
-}
-
-func (b *Block) DeriveHash() {
-	hash := sha256.Sum256(bytes.Join([][]byte{b.Data, b.PrevHash}, []byte{}))
-	b.Hash = hash[:]
-}
-
-func (b *Block) Describe() {
-	fmt.Printf("previous hash: %x, data: %s, hash: %x\n", b.PrevHash, b.Data, b.Hash)
-}
-
-func (c *Chain) Describe() {
-	for _, block := range c.Blocks {
-		block.Describe()
-	}
 }
