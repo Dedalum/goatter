@@ -2,6 +2,7 @@ package blockchain
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/dgraph-io/badger"
 )
@@ -16,7 +17,11 @@ type BlockChainIterator struct {
 	Database    *badger.DB
 }
 
-const dbPath = "./tmp/blocks"
+const (
+	dbPath       = "./tmp/blocks"
+	dbFile       = "./tmp/blocks/MANIFEST"                  // this filie can be used to verify the blokchain exists
+	genesisDatsa = "Goatter first transaction from Genesis" // arbitrary data
+)
 
 // NewBlockChain returns a new initialised chain
 func InitBlockChain() *BlockChain {
@@ -30,7 +35,7 @@ func InitBlockChain() *BlockChain {
 
 	// 2
 	err = db.Update(func(txn *badger.Txn) error {
-		// lh = last hsh
+		// lh = last hash
 		item, err := txn.Get([]byte("lh"))
 		if err == badger.ErrKeyNotFound {
 			fmt.Println("No existing blockchain found")
@@ -105,4 +110,12 @@ func (iterator *BlockChainIterator) Next() *Block {
 	iterator.CurrentHash = block.PrevHash
 
 	return block
+}
+
+// DBExists checks whether a DB has been initialized or not
+func DBExists(db) bool {
+	if _, err := os.Stat(db); os.IsNotExist(err) {
+		return false
+	}
+	return true
 }
