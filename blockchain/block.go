@@ -2,16 +2,17 @@ package blockchain
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/gob"
 	"fmt"
 	"log"
 )
 
 type Block struct {
-	Hash     []byte
-	Data     []byte
-	PrevHash []byte
-	Nonce    int
+	Hash         []byte
+	Transactions []*Transaction
+	PrevHash     []byte
+	Nonce        int
 }
 
 type Chain struct {
@@ -30,8 +31,8 @@ func (c *Chain) Describe() {
 }
 
 // NewBlock returns a new block
-func NewBlock(data string, prevHash []byte) *Block {
-	block := &Block{[]byte{}, []byte(data), prevHash, 0}
+func NewBlock(txs []*Transaction, prevHash []byte) *Block {
+	block := &Block{[]byte{}, txs, prevHash, 0}
 	pow := NewProofOfWork(block)
 	nonce, hash := pow.Run()
 
@@ -46,8 +47,8 @@ func (c *Chain) AddBlock(data string) {
 	c.Blocks = append(c.Blocks, NewBlock(data, prevHash))
 }
 
-func Genesis() *Block {
-	return NewBlock("GoatterGenesis", []byte{})
+func Genesis(coinbase *Transaction) *Block {
+	return NewBlock([]*Transaction{coinbase}, []byte{})
 }
 
 func (b *Block) Serialize() []byte {
@@ -77,4 +78,16 @@ func Handle(err error) {
 
 func (b *Block) Describe() {
 	fmt.Printf("previous hash: %x, data: %s, hash: %x\n", b.PrevHash, b.Data, b.Hash)
+}
+
+func (b *Block) HashTransactions() []byte {
+	var txHashes [][]byte
+	var txHash [32]byte
+
+	for _, tx := range b.Transactions {
+		txHashes = append(txHashes, tx.ID)
+	}
+	txHash = sha256.Sum256(bytes.Join(txHashes, []byte))
+
+	return txHash[:]
 }
