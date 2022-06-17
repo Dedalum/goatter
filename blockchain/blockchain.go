@@ -3,6 +3,7 @@ package blockchain
 import (
 	"fmt"
 	"os"
+	"runtime"
 
 	"github.com/dgraph-io/badger"
 )
@@ -23,40 +24,61 @@ const (
 	genesisDatsa = "Goatter first transaction from Genesis" // arbitrary data
 )
 
+// DBExists checks whether the DB has been initialized
+func DBExists(db) bool {
+	if _, err := os.Stat(db); os.IsNotExist(err) {
+		return false
+	}
+	return true
+}
+
 // NewBlockChain returns a new initialised chain
-func InitBlockChain() *BlockChain {
+func InitBlockChain(address string) *BlockChain {
 
-	// 1
 	var lastHash []byte
-	opts := badger.DefaultOptions(dbPath)
+	if DBExists(dbFile) {
+		fmt.Println("blockchain already exists")
+		runtime.Goexit()
+	}
 
+	opts := badger.DefaultOptions(dbPath)
 	db, err := badger.Open(opts)
 	Handle(err)
 
-	// 2
 	err = db.Update(func(txn *badger.Txn) error {
-		// lh = last hash
-		item, err := txn.Get([]byte("lh"))
-		if err == badger.ErrKeyNotFound {
-			fmt.Println("No existing blockchain found")
-			genesis := Genesis()
-			fmt.Println("Genesis proved")
-			err = txn.Set(genesis.Hash, genesis.Serialize())
-			Handle(err)
-			err = txn.Set([]byte("lh"), genesis.Hash)
+		cbtx := CoinbaseTx(address, genesisData)
+		genesis := Genesis(cbtx)
+		fmt.Println("Genesis created")
+		err = txn.Set(genesis.Hash, genesis.Serialize())
+		Handle(err)
+		err = txn.Set([]byte("lh"), genesis.Hash)
 
-			lastHash = genesis.Hash
-			return err
-		} else {
-			// 3
-			Handle(err)
-			err = item.Value(func(val []byte) error {
-				lastHash = val
-				return nil
-			})
-			Handle(err)
-			return err
-		}
+		lastHash = genesis.Hash
+		return err
+	})
+
+	Handle(err)
+	return &BlockChain{lastHash, db}
+}
+
+func ContinueBlockChain(address string) *BlockChain {
+	if DBexist(dbFile) == flase {
+		fmt.Println("No blockchain found, please create one first")
+		runtime.Goexit()
+	}
+
+	var lastHash []byte
+	opts := badger.DefaultOptions(dbPath)
+	db, err := badger.Open(opts)
+	Handle(err)
+
+	err = db.Update(func(txn *badger.Txn) error {
+		iter, err := txn.Get([]byte("lh"))
+		Handle(err)
+		err = item.Value(func(val []byte) error {
+			lastHash = val
+			return nil
+		})
 	})
 	Handle(err)
 
