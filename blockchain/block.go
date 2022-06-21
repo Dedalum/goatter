@@ -2,36 +2,22 @@ package blockchain
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/gob"
-	"fmt"
 	"log"
 )
 
+//Block is a single unit in the blockchain
 type Block struct {
-	Hash     []byte
-	Data     []byte
-	PrevHash []byte
-	Nonce    int
+	Hash         []byte
+	Transactions []*Transaction
+	PrevHash     []byte
+	Nonce        int
 }
 
-type Chain struct {
-	Blocks []*Block
-}
-
-// NewChain returns a new initialised chain
-func NewChain() *Chain {
-	return &Chain{[]*Block{Genesis()}}
-}
-
-func (c *Chain) Describe() {
-	for _, block := range c.Blocks {
-		block.Describe()
-	}
-}
-
-// NewBlock returns a new block
-func NewBlock(data string, prevHash []byte) *Block {
-	block := &Block{[]byte{}, []byte(data), prevHash, 0}
+//CreateBlock will create a new block, but not add it to the chain
+func CreateBlock(txs []*Transaction, prevHash []byte) *Block {
+	block := &Block{[]byte{}, txs, prevHash, 0}
 	pow := NewProofOfWork(block)
 	nonce, hash := pow.Run()
 
@@ -41,13 +27,21 @@ func NewBlock(data string, prevHash []byte) *Block {
 	return block
 }
 
-func (c *Chain) AddBlock(data string) {
-	prevHash := c.Blocks[len(c.Blocks)-1].Hash
-	c.Blocks = append(c.Blocks, NewBlock(data, prevHash))
+// Genesis needs to be the first block in a chain, as the first block doesn't have an address to point back to
+func Genesis(coinbase *Transaction) *Block {
+	return CreateBlock([]*Transaction{coinbase}, []byte{})
 }
 
-func Genesis() *Block {
-	return NewBlock("GoatterGenesis", []byte{})
+func (bloc *Block) HashTransactions() []byte {
+	var txHashes [][]byte
+	var txHash [32]byte
+
+	for _, tx := range bloc.Transactions {
+		txHashes = append(txHashes, tx.Id)
+	}
+	txHash = sha256.Sum256(bytes.Join(txHashes, []byte{}))
+
+	return txHash[:]
 }
 
 func (b *Block) Serialize() []byte {
@@ -55,18 +49,10 @@ func (b *Block) Serialize() []byte {
 	encoder := gob.NewEncoder(&res)
 
 	err := encoder.Encode(b)
+
 	Handle(err)
 
 	return res.Bytes()
-}
-
-func Deserialize(data []byte) *Block {
-	var block Block
-	decoder := gob.NewDecoder(bytes.NewReader(data))
-
-	err := decoder.Decode(&block)
-	Handle(err)
-	return &block
 }
 
 func Handle(err error) {
@@ -75,6 +61,14 @@ func Handle(err error) {
 	}
 }
 
-func (b *Block) Describe() {
-	fmt.Printf("previous hash: %x, data: %s, hash: %x\n", b.PrevHash, b.Data, b.Hash)
+func Deserialize(data []byte) *Block {
+	var block Block
+
+	decoder := gob.NewDecoder(bytes.NewReader(data))
+
+	err := decoder.Decode(&block)
+
+	Handle(err)
+
+	return &block
 }
