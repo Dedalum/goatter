@@ -2,11 +2,7 @@
 
 Golang (blockchain) goat otter = Goatter
 
-From:
 ![image](https://user-images.githubusercontent.com/6129046/168286709-d9310473-556b-4825-b378-abdebe623e7f.png)
-
-to:
-![image](https://user-images.githubusercontent.com/6129046/175556575-e3ab1b9e-8f7f-49c9-a60d-8c33f2cf1d40.png)
 
 ## Table of contents
 
@@ -38,3 +34,5 @@ src: https://dev.to/nheindev/build-the-hello-world-of-blockchain-in-go-bli
 3. checkout more specific proof of work algorithms and other methods
 4. acyclic graph: @SpaceAzur ADLD (acyclic Diagram Lead Designer)
 5. contact marketing for money raise
+
+![image](https://user-images.githubusercontent.com/6129046/175556575-e3ab1b9e-8f7f-49c9-a60d-8c33f2cf1d40.png)
