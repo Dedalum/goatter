@@ -16,11 +16,21 @@ Golang (blockchain) goat otter = Goatter
 ## Usage
 
 ## Development
+
+1. Build a basic blockchain with tokens (transactions and wallets)
+2. Deploy the blockchain on a peer-to-peer network and start alpha version
+3. Handle algorithm to build a bloc every X minutes (10 min for BTC for instance):
+    - a bloc contains several transactions, update that quanity of transactions to fit about the X minutes timing 
+4. Allow beta users to enter the network and mine goatter coins
+5. Improve the algorithms:
+    - proof of work algo
+    - check out the advantages of a ADLD
+
 src: https://dev.to/nheindev/build-the-hello-world-of-blockchain-in-go-bli
 
 ## TODO
 1. (finish tutorial)
 2. handle peer to peer network and deploy on a test network (comprised of our own laptops)
 3. checkout more specific proof of work algorithms and other methods
-4. acyclic graph: @SpaceAzur aDLD (acyclic Diagram Lead Designer)
+4. acyclic graph: @SpaceAzur ADLD (acyclic Diagram Lead Designer)
 5. contact marketing for money raise
