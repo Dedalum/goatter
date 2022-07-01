@@ -70,6 +70,10 @@ func InitBlockChain(address string) *BlockChain {
 		runtime.Goexit()
 	}
 
+	if _, err := os.Stat(dbPath); os.IsNotExist((err)) {
+		os.MkdirAll(dbPath, os.ModePerm)
+	}
+
 	opts := badger.DefaultOptions(dbPath)
 	db, err := badger.Open(opts)
 	Handle(err)
