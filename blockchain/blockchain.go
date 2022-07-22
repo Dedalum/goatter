@@ -6,6 +6,16 @@ import (
 	"github.com/dgraph-io/badger"
 )
 
+const (
+    dbPath = "./tmp/blocks"
+
+    // This can be used to verify that the blockchain exists
+    dbFile = "./tmp/blocks/MANIFEST" 
+
+    // This is arbitrary data for our genesis block
+    genesisData = "First Transaction from Genesis" 
+)
+
 type BlockChain struct {
 	LastHash []byte
 	Database *badger.DB

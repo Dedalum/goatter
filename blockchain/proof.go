@@ -82,3 +82,16 @@ func (pow *ProofOfWork) Validate() bool {
 
 	return intHash.Cmp(pow.Target) == -1
 }
+
+func (pow *ProofOfWork) InitData(nonce int) []byte {
+    data := bytes.Join(
+        [][]byte{
+            pow.Block.PrevHash,
+            pow.Block.HashTransactions(), // THIS IS THE LINE WE CHANGED
+            toHex(int64(nonce)),
+            toHex(int64(Difference)),
+        },
+        []byte{},
+    )
+    return data
+}

@@ -6,8 +6,11 @@ import (
 	"os"
 	"runtime"
 	"strconv"
+	"log"
 
 	"github.com/Dedalum/goatter/blockchain"
+	"github.com/Dedalum/goatter/cli"
+	"github.com/Dedalum/goatter/blockchain/wallet"
 )
 
 type CommandLine struct {
@@ -18,6 +21,8 @@ func (cli *CommandLine) printUsage() {
 	fmt.Println("Usage: ")
 	fmt.Println(" add -block <BLOCK_DATA> - add a block to the chain")
 	fmt.Println(" print - prints the blocks in the chain")
+	fmt.Println("createwallet - Creates a new wallet")
+    fmt.Println("listaddresses - Lists the addresses in the wallet file")
 }
 
 func (cli *CommandLine) validateArgs() {
@@ -91,6 +96,6 @@ func main() {
 	chain := blockchain.InitBlockChain()
 	defer chain.Database.Close()
 
-	cli := CommandLine{chain}
-	cli.run()
+	cmd := cli.CommandLine{chain}
+	cmd.run()
 }
