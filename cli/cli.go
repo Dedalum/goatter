@@ -80,16 +80,9 @@ func (cli *CommandLine) createBlockChain(address string) {
 }
 
 func (cli *CommandLine) getBalance(address string) {
-	chain := blockchain.ContinueBlockChain(address)
-	defer chain.Database.Close()
-
-	balance := 0
-	UTXOs := chain.FindUTXO(address)
-
-	for _, out := range UTXOs {
-		balance += out.Value
-	}
-
+	wallets, _ := wallet.NewWallets()
+	wallet := wallets.GetWallet(address)
+	balance := wallet.GetBalance()
 	fmt.Printf("Balance of %s: %d\n", address, balance)
 }
 

@@ -42,7 +42,7 @@ func (ws *Wallets) LoadFile() error {
 	var wallets Wallets
 	gob.Register(elliptic.P256())
 	decoder := gob.NewDecoder(bytes.NewReader(fileContent))
-	err = decodemr.Decode(&wallets)
+	err = decoder.Decode(&wallets)
 	if err != nil {
 		return err
 	}

@@ -7,6 +7,7 @@ import (
 	"crypto/sha256"
 	"log"
 
+	"github.com/Dedalum/goatter/blockchain"
 	"golang.org/x/crypto/ripemd160"
 )
 
@@ -65,4 +66,19 @@ func NewWallet() *Wallet {
 		privKey,
 		pubKey,
 	}
+}
+
+func (w *Wallet) GetBalance() int {
+	address := string(w.Address())
+	chain := blockchain.ContinueBlockChain(address)
+	defer chain.Database.Close()
+
+	balance := 0
+	UTXOs := chain.FindUTXO(address)
+
+	for _, out := range UTXOs {
+		balance += out.Value
+	}
+
+	return balance
 }
