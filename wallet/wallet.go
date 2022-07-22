@@ -4,7 +4,10 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
+	"crypto/sha256"
 	"log"
+
+	"golang.org/x/crypto/ripemd160"
 )
 
 const (
@@ -15,7 +18,7 @@ const (
 
 // Wallet struct
 type Wallet struct {
-	PrivateKey ecdsa.PrivateKeya // Elipitic Curve Digial Signature Algorithm
+	PrivateKey ecdsa.PrivateKey // Elipitic Curve Digial Signature Algorithm
 	PublicKey  []byte
 }
 
@@ -28,4 +31,38 @@ func NewKeyPair() (ecdsa.PrivateKey, []byte) {
 
 	pub := append(private.PublicKey.X.Bytes(), private.PublicKey.Y.Bytes()...)
 	return *private, pub
+}
+
+func PublicKeyHash(publicKey []byte) []byte {
+	hashedPublicKey := sha256.Sum256(publicKey)
+
+	hasher := ripemd160.New()
+	hasher.Write(hashedPublicKey[:]) // never returns an error: https://pkg.go.dev/hash#Hash
+	publicRipeMd := hasher.Sum(nil)
+	return publicRipeMd
+}
+
+func Checksum(ripedMdHash []byte) []byte {
+	hash := sha256.Sum256(ripedMdHash)
+	hash2 := sha256.Sum256(hash[:])
+
+	return hash2[:checksumLength]
+}
+
+func (w *Wallet) Address() []byte {
+	pubKeyHash := PublicKeyHash(w.PublicKey)
+	versionedHash := append([]byte{version}, pubKeyHash...)
+	checksum := Checksum(versionedHash)
+	finalHash := append(versionedHash, checksum...)
+	address := base58Encode(finalHash)
+
+	return address
+}
+
+func NewWallet() *Wallet {
+	privKey, pubKey := NewKeyPair()
+	return &Wallet{
+		privKey,
+		pubKey,
+	}
 }
