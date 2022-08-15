@@ -2,6 +2,8 @@
 
 Golang (blockchain) goat otter = Goatter
 
+Build a simple blockchain distributed accross multiple nodes: workshop on Golang, blockchain (more or less following the bitcoin porotocol) and a few other themes (see [Development](#development))
+
 ![image](https://user-images.githubusercontent.com/6129046/168286709-d9310473-556b-4825-b378-abdebe623e7f.png)
 
 ## Table of contents
