@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/gob"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"log"
 )
@@ -86,4 +87,22 @@ func NewTransaction(from, to string, amount int, chain *BlockChain) *Transaction
 	tx.SetID()
 
 	return &tx
+}
+
+// Serialise the transaction to send over network
+func (tx *Transaction) Serialise() []byte {
+	serialised_tx, err := json.Marshal(tx)
+	if err != nil {
+		log.Panic() //TODO: use logger
+	}
+
+	return serialised_tx
+}
+
+func Unserialise(transaction []byte) *Transaction {
+	tx := &Transaction{}
+	if err := json.Unmarshal(transaction, tx); err != nil {
+		log.Panic()
+	}
+	return tx
 }
