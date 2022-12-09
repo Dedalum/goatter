@@ -15,7 +15,7 @@ const (
 	genesisData = "First Transaction from Genesis" // This is arbitrary data for our genesis data
 )
 
-//BlockChain is an array of block pointers
+// BlockChain is an array of block pointers
 type BlockChain struct {
 	LastHash []byte
 	Database *badger.DB
@@ -32,7 +32,7 @@ func DBexists() bool {
 	return true
 }
 
-//ContinueBlockChain will be called to append to an existing blockchain
+// ContinueBlockChain will be called to append to an existing blockchain
 func ContinueBlockChain(address string) *BlockChain {
 	if !DBexists() {
 		fmt.Println("No blockchain found, please create one first")
@@ -61,7 +61,7 @@ func ContinueBlockChain(address string) *BlockChain {
 	return &chain
 }
 
-//InitBlockChain will be what starts a new blockChain
+// InitBlockChain will be what starts a new blockChain
 func InitBlockChain(address string) *BlockChain {
 	var lastHash []byte
 
@@ -228,4 +228,8 @@ Work:
 		}
 	}
 	return accumulated, unspentOuts
+}
+
+func (chain *BlockChain) Serialise() []byte { //TODO:
+	return []byte{}
 }

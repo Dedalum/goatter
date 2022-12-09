@@ -91,12 +91,12 @@ func NewTransaction(from, to string, amount int, chain *BlockChain) *Transaction
 
 // Serialise the transaction to send over network
 func (tx *Transaction) Serialise() []byte {
-	serialised_tx, err := json.Marshal(tx)
+	serialisedTx, err := json.Marshal(tx)
 	if err != nil {
 		log.Panic() //TODO: use logger
 	}
 
-	return serialised_tx
+	return serialisedTx
 }
 
 func Unserialise(transaction []byte) *Transaction {
